@@ -1,0 +1,25 @@
+{
+  "name": "tradeomatic-ai",
+  "version": "3.0.0",
+  "description": "Tradeomatic AI mobile research assistant and authenticated paper workflow",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "build": "esbuild src/app.jsx --bundle --minify --outfile=dist/app.js",
+    "test": "python -m pytest -q",
+    "test:ui": "esbuild tests/paper-demo.test.mjs --bundle --platform=node --format=esm --outfile=.test-build/paper-demo.mjs && node --test .test-build/paper-demo.mjs",
+    "test:push": "node --test tests/push-worker.test.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "esbuild": "^0.28.2",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "private": true
+}

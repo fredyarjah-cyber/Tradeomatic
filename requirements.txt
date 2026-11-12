@@ -1,0 +1,11 @@
+fastapi==0.141.1
+uvicorn==0.52.1
+sqlalchemy==2.1.8
+psycopg[binary]==3.3.9
+httpx[socks]==0.28.1
+exchange-calendars==4.13.2
+pytest==9.2.0
+cryptography==50.0.0
+pywebpush==2.5.0
+pyotp==2.10.0
+argon2-cffi==25.1.0

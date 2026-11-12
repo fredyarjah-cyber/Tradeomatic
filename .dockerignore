@@ -1,0 +1,12 @@
+.git
+.openai
+node_modules
+__pycache__
+.pytest_cache
+.test-build
+.env
+*.db
+*.tar.gz
+encrypted-backups
+*.dump.fernet
+dist/tradeomatic-ai-source.zip

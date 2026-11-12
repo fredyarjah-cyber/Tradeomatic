@@ -1,0 +1,10 @@
+node_modules/
+__pycache__/
+.pytest_cache/
+*.db
+.env
+*.tar.gz
+.test-build/
+encrypted-backups/
+*.dump.fernet
+paper-soak-report.json

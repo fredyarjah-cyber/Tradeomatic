@@ -1,0 +1,1 @@
+{"equity": 10000, "allocation": 1000, "risk_pct": 1, "rr": 2, "leverage": 1, "max_open_positions": 3, "max_exposure_pct": 100, "max_portfolio_risk_pct": 3, "daily_loss_pct": 3, "emergency_stop": false, "signal_ttl_bars": 2, "min_score": 65, "max_cost_risk_ratio": 0.2, "max_atr_pct": 5, "require_event_coverage": true, "allow_short": true}

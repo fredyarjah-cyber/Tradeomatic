@@ -1,0 +1,1179 @@
+{
+  "kind": "WALK_FORWARD_RESEARCH",
+  "source": "SIMULATED",
+  "symbol": "USD/JPY",
+  "interval": "1h",
+  "settings": {
+    "equity": 10000,
+    "allocation": 1000,
+    "risk_pct": 1,
+    "rr": 2,
+    "leverage": 1,
+    "max_open_positions": 3,
+    "max_exposure_pct": 100,
+    "max_portfolio_risk_pct": 3,
+    "daily_loss_pct": 3,
+    "emergency_stop": false,
+    "signal_ttl_bars": 2,
+    "min_score": 65,
+    "max_cost_risk_ratio": 0.2,
+    "max_atr_pct": 5,
+    "require_event_coverage": true,
+    "allow_short": true
+  },
+  "folds": [
+    {
+      "train_start": "2026-10-12T00:00:00+00:00",
+      "train_end": "2026-10-20T08:00:00+00:00",
+      "test_start": "2026-10-20T08:00:00+00:00",
+      "test_end": "2026-10-26T04:00:00+00:00",
+      "selected_strategy": "confluence",
+      "selected_rr": 2,
+      "selection_basis": "Default, insufficient training trades",
+      "test_metrics": {
+        "closed_trades": 2,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "profit_factor_note": null,
+        "max_drawdown_pct": 0.14688651516895332,
+        "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+        "average_r_multiple": -0.9998943434954988,
+        "net_pnl": -14.688651516895403,
+        "equity_curve": [
+          {
+            "time": null,
+            "equity": 10000
+          },
+          {
+            "time": 1792782000,
+            "equity": 9992.731678366825
+          },
+          {
+            "time": 1792886400,
+            "equity": 9985.311348483105
+          }
+        ],
+        "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+        "costs_included": true
+      }
+    },
+    {
+      "train_start": "2026-10-17T20:00:00+00:00",
+      "train_end": "2026-10-26T04:00:00+00:00",
+      "test_start": "2026-10-26T04:00:00+00:00",
+      "test_end": "2026-11-01T00:00:00+00:00",
+      "selected_strategy": "confluence",
+      "selected_rr": 2,
+      "selection_basis": "Default, insufficient training trades",
+      "test_metrics": {
+        "closed_trades": 1,
+        "win_rate": 1.0,
+        "profit_factor": null,
+        "profit_factor_note": "Undefined when no losing trades",
+        "max_drawdown_pct": 0,
+        "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+        "average_r_multiple": 2.636719672667044,
+        "net_pnl": 18.217975669131274,
+        "equity_curve": [
+          {
+            "time": null,
+            "equity": 10000
+          },
+          {
+            "time": 1793491200,
+            "equity": 10018.217975669131
+          }
+        ],
+        "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+        "costs_included": true
+      }
+    },
+    {
+      "train_start": "2026-10-23T16:00:00+00:00",
+      "train_end": "2026-11-01T00:00:00+00:00",
+      "test_start": "2026-11-01T00:00:00+00:00",
+      "test_end": "2026-11-06T20:00:00+00:00",
+      "selected_strategy": "confluence",
+      "selected_rr": 2,
+      "selection_basis": "Default, insufficient training trades",
+      "test_metrics": {
+        "closed_trades": 2,
+        "win_rate": 0.5,
+        "profit_factor": 9.095910556333315,
+        "profit_factor_note": null,
+        "max_drawdown_pct": 0.018491500104935023,
+        "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+        "average_r_multiple": 1.404235095165488,
+        "net_pnl": 14.995775539438824,
+        "equity_curve": [
+          {
+            "time": null,
+            "equity": 10000
+          },
+          {
+            "time": 1793901600,
+            "equity": 10016.848041005453
+          },
+          {
+            "time": 1793995200,
+            "equity": 10014.995775539439
+          }
+        ],
+        "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+        "costs_included": true
+      }
+    },
+    {
+      "train_start": "2026-10-29T12:00:00+00:00",
+      "train_end": "2026-11-06T20:00:00+00:00",
+      "test_start": "2026-11-06T20:00:00+00:00",
+      "test_end": "2026-11-12T16:00:00+00:00",
+      "selected_strategy": "confluence",
+      "selected_rr": 2,
+      "selection_basis": "Default, insufficient training trades",
+      "test_metrics": {
+        "closed_trades": 1,
+        "win_rate": 1.0,
+        "profit_factor": null,
+        "profit_factor_note": "Undefined when no losing trades",
+        "max_drawdown_pct": 0,
+        "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+        "average_r_multiple": 1.2649538687317226,
+        "net_pnl": 7.024590157988299,
+        "equity_curve": [
+          {
+            "time": null,
+            "equity": 10000
+          },
+          {
+            "time": 1794499200,
+            "equity": 10007.024590157987
+          }
+        ],
+        "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+        "costs_included": true
+      }
+    }
+  ],
+  "training_comparisons": [
+    [
+      {
+        "strategy": "confluence",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 0.5,
+          "profit_factor": 35.28711310267341,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.0054133729187508025,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 1.471388274153684,
+          "net_pnl": 18.59641625574471,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792270800,
+              "equity": 10019.138789601673
+            },
+            {
+              "time": 1792483200,
+              "equity": 10018.596416255745
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 1.0,
+          "profit_factor": null,
+          "profit_factor_note": "Undefined when no losing trades",
+          "max_drawdown_pct": 0,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 2.2791693809041913,
+          "net_pnl": 17.883574111109084,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792483200,
+              "equity": 10017.883574111109
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 3,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 1.0,
+          "profit_factor": null,
+          "profit_factor_note": "Undefined when no losing trades",
+          "max_drawdown_pct": 0,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 2.2791693809041913,
+          "net_pnl": 17.883574111109084,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792483200,
+              "equity": 10017.883574111109
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      }
+    ],
+    [
+      {
+        "strategy": "confluence",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 0.0,
+          "profit_factor": 0.0,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.05426646692865689,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": -0.6829483392648223,
+          "net_pnl": -5.426646692865185,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792987200,
+              "equity": 9994.573353307134
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 0.0,
+          "profit_factor": 0.0,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.0701857103032853,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": -0.7361638319926381,
+          "net_pnl": -7.018571030328731,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792987200,
+              "equity": 9992.981428969671
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 3,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 0.0,
+          "profit_factor": 0.0,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.0701857103032853,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": -0.7361638319926381,
+          "net_pnl": -7.018571030328731,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792987200,
+              "equity": 9992.981428969671
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      }
+    ],
+    [
+      {
+        "strategy": "confluence",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 0.5,
+          "profit_factor": 2.4551436330479888,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.07420329883720116,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 0.81841268706061,
+          "net_pnl": 10.797645785411113,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792886400,
+              "equity": 9992.57967011628
+            },
+            {
+              "time": 1793491200,
+              "equity": 10010.797645785411
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 0.5,
+          "profit_factor": 1.964632668156972,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.07420329883720116,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 0.4279676483988928,
+          "net_pnl": 7.15789261433789,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792886400,
+              "equity": 9992.57967011628
+            },
+            {
+              "time": 1793491200,
+              "equity": 10007.157892614337
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 3,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 0.5,
+          "profit_factor": 1.964632668156972,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.07420329883720116,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 0.4279676483988928,
+          "net_pnl": 7.15789261433789,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1792886400,
+              "equity": 9992.57967011628
+            },
+            {
+              "time": 1793491200,
+              "equity": 10007.157892614337
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      }
+    ],
+    [
+      {
+        "strategy": "confluence",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 1.0,
+          "profit_factor": null,
+          "profit_factor_note": "Undefined when no losing trades",
+          "max_drawdown_pct": 0,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 1.934165743269152,
+          "net_pnl": 25.735026812465527,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1793581200,
+              "equity": 10015.82731034705
+            },
+            {
+              "time": 1793995200,
+              "equity": 10025.735026812465
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 2,
+        "metrics": {
+          "closed_trades": 2,
+          "win_rate": 0.5,
+          "profit_factor": 9.429918074002915,
+          "profit_factor_note": null,
+          "max_drawdown_pct": 0.026375070249813747,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 1.3736784823145272,
+          "net_pnl": 22.28940517893102,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1793912400,
+              "equity": 10024.933488429
+            },
+            {
+              "time": 1793995200,
+              "equity": 10022.28940517893
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      },
+      {
+        "strategy": "breakout",
+        "rr": 3,
+        "metrics": {
+          "closed_trades": 1,
+          "win_rate": 1.0,
+          "profit_factor": null,
+          "profit_factor_note": "Undefined when no losing trades",
+          "max_drawdown_pct": 0,
+          "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+          "average_r_multiple": 2.6846817274991173,
+          "net_pnl": 22.31034424440035,
+          "equity_curve": [
+            {
+              "time": null,
+              "equity": 10000
+            },
+            {
+              "time": 1793995200,
+              "equity": 10022.3103442444
+            }
+          ],
+          "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+          "costs_included": true
+        },
+        "selection_score": null
+      }
+    ]
+  ],
+  "metrics": {
+    "closed_trades": 6,
+    "win_rate": 0.5,
+    "profit_factor": 2.544635637556303,
+    "profit_factor_note": null,
+    "max_drawdown_pct": 0.14688651516895332,
+    "drawdown_basis": "Realized closed-trade equity; intratrade drawdown is not included",
+    "average_r_multiple": 0.7850591741231242,
+    "net_pnl": 25.549689849662993,
+    "equity_curve": [
+      {
+        "time": null,
+        "equity": 10000
+      },
+      {
+        "time": 1792782000,
+        "equity": 9992.731678366825
+      },
+      {
+        "time": 1792886400,
+        "equity": 9985.311348483105
+      },
+      {
+        "time": 1793491200,
+        "equity": 10003.529324152236
+      },
+      {
+        "time": 1793901600,
+        "equity": 10020.377365157688
+      },
+      {
+        "time": 1793995200,
+        "equity": 10018.525099691675
+      },
+      {
+        "time": 1794499200,
+        "equity": 10025.549689849662
+      }
+    ],
+    "sample_warning": "Research only. No evidence of profitability from this sample alone.",
+    "costs_included": true
+  },
+  "trades": [
+    {
+      "id": "6db4d710-b374-4d0e-a9f8-16586a9993af",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1792483200:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "BUY",
+      "status": "CLOSED",
+      "approved_at": 1792486800,
+      "expires_at": "2026-10-20T11:00:00+00:00",
+      "stop": 152.96435978728667,
+      "initial_stop": 152.96435978728667,
+      "target1": 156.32353858437475,
+      "target2": 157.4432648500708,
+      "entry_reference": 154.0394146227421,
+      "entry_zone": [
+        154.0040957619522,
+        154.07473348353201
+      ],
+      "quote_to_usd": 0.006491844976489295,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 7.269089333001875,
+      "notional_usd": 999.9999999999999,
+      "margin_usd": 999.9999999999999,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1792486800,
+          "price": 154.05635895835061,
+          "mid": 154.0394146227421,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1792782000,
+          "price": 152.94753370771008,
+          "mid": 152.96435978728667,
+          "units": 1000.0,
+          "pnl": -7.268321633175243,
+          "reason": "STOP_LOSS (stop-first if OHLC ambiguous)",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": -7.268321633175243,
+      "unrealized_pnl": 0,
+      "last_bar": 1792782000,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "STOP_LOSS (stop-first if OHLC ambiguous)",
+      "events": [
+        {
+          "time": 1792486800,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1792782000,
+          "action": "STOP_LOSS (stop-first if OHLC ambiguous)"
+        }
+      ],
+      "entry_mid": 154.0394146227421,
+      "entry_fill": 154.05635895835061,
+      "entered_at": 1792486800,
+      "last_price": 153.24085976880303,
+      "closed_at": 1792782000
+    },
+    {
+      "id": "d85018f3-e4fa-46b2-a624-ab6e41287641",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1792843200:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "BUY",
+      "status": "CLOSED",
+      "approved_at": 1792846800,
+      "expires_at": "2026-10-24T15:00:00+00:00",
+      "stop": 152.88560138940335,
+      "initial_stop": 152.88560138940335,
+      "target1": 156.3137927852024,
+      "target2": 157.45652325046876,
+      "entry_reference": 153.98367658845905,
+      "entry_zone": [
+        153.94955765848619,
+        154.0177955184319
+      ],
+      "quote_to_usd": 0.006494194853345573,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 7.421114306293941,
+      "notional_usd": 1000.0,
+      "margin_usd": 1000.0,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1792846800,
+          "price": 154.00061479288377,
+          "mid": 153.98367658845905,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1792886400,
+          "price": 152.86878397325052,
+          "mid": 152.88560138940335,
+          "units": 1000.0,
+          "pnl": -7.42032988372016,
+          "reason": "STOP_LOSS (stop-first if OHLC ambiguous)",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": -7.42032988372016,
+      "unrealized_pnl": 0,
+      "last_bar": 1792886400,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "STOP_LOSS (stop-first if OHLC ambiguous)",
+      "events": [
+        {
+          "time": 1792846800,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1792886400,
+          "action": "STOP_LOSS (stop-first if OHLC ambiguous)"
+        }
+      ],
+      "entry_mid": 153.98367658845905,
+      "entry_fill": 154.00061479288377,
+      "entered_at": 1792846800,
+      "last_price": 153.11930382365873,
+      "closed_at": 1792886400
+    },
+    {
+      "id": "0e34c4f6-8aab-4675-8c82-96b2bb67a1c0",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1793030400:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "SELL",
+      "status": "CLOSED",
+      "approved_at": 1793034000,
+      "expires_at": "2026-10-26T19:00:00+00:00",
+      "stop": 153.6242546298075,
+      "initial_stop": 153.6242546298075,
+      "target1": 150.46087047953932,
+      "target2": 149.4064090961166,
+      "entry_reference": 152.61405132126794,
+      "entry_zone": [
+        152.57913683536626,
+        152.64896580716962
+      ],
+      "quote_to_usd": 0.0065524765992542805,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 6.909333539694713,
+      "notional_usd": 1000.0,
+      "margin_usd": 1000.0,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1793034000,
+          "price": 152.5972637756226,
+          "mid": 152.61405132126794,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1793491200,
+          "price": 149.8062617182917,
+          "mid": 149.7897848419591,
+          "units": 1000.0,
+          "pnl": 18.217975669131274,
+          "reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": 18.217975669131274,
+      "unrealized_pnl": 0,
+      "last_bar": 1793487600,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+      "events": [
+        {
+          "time": 1793034000,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1793491200,
+          "action": "PREDECLARED_END_OF_TEST_LIQUIDATION"
+        }
+      ],
+      "entry_mid": 152.61405132126794,
+      "entry_fill": 152.5972637756226,
+      "entered_at": 1793034000,
+      "last_price": 149.7897848419591,
+      "target1_reached": true,
+      "suggested_stop": 152.61405132126794,
+      "closed_at": 1793491200
+    },
+    {
+      "id": "37293204-67d5-410d-9773-fdb415426088",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1793541600:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "SELL",
+      "status": "CLOSED",
+      "approved_at": 1793545200,
+      "expires_at": "2026-11-01T17:00:00+00:00",
+      "stop": 150.49830979098826,
+      "initial_stop": 150.49830979098826,
+      "target1": 147.97642180755838,
+      "target2": 147.1357924797484,
+      "entry_reference": 149.7010937803746,
+      "entry_zone": [
+        149.6660018124082,
+        149.736185748341
+      ],
+      "quote_to_usd": 0.006679977912967642,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 5.615385342763378,
+      "notional_usd": 1000.0000000000001,
+      "margin_usd": 1000.0000000000001,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1793545200,
+          "price": 149.68462666005877,
+          "mid": 149.7010937803746,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1793901600,
+          "price": 147.15197741692117,
+          "mid": 147.1357924797484,
+          "units": 1000.0,
+          "pnl": 16.84804100545337,
+          "reason": "TAKE_PROFIT_2",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": 16.84804100545337,
+      "unrealized_pnl": 0,
+      "last_bar": 1793901600,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "TAKE_PROFIT_2",
+      "events": [
+        {
+          "time": 1793545200,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1793901600,
+          "action": "TAKE_PROFIT_2"
+        }
+      ],
+      "entry_mid": 149.7010937803746,
+      "entry_fill": 149.68462666005877,
+      "entered_at": 1793545200,
+      "last_price": 147.32328558513268,
+      "target1_reached": true,
+      "suggested_stop": 149.7010937803746,
+      "closed_at": 1793901600
+    },
+    {
+      "id": "0b679d18-cbf9-453e-bc44-d6073c8d3064",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1793901600:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "SELL",
+      "status": "CLOSED",
+      "approved_at": 1793905200,
+      "expires_at": "2026-11-05T21:00:00+00:00",
+      "stop": 148.47244619093834,
+      "initial_stop": 148.47244619093834,
+      "target1": 144.21228847059174,
+      "target2": 142.7922358971429,
+      "entry_reference": 147.09505118233236,
+      "entry_zone": [
+        147.0598769412083,
+        147.1302254234564
+      ],
+      "quote_to_usd": 0.006798325245901341,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 9.653979260584576,
+      "notional_usd": 1000.0,
+      "margin_usd": 1000.0,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1793905200,
+          "price": 147.0788707267023,
+          "mid": 147.09505118233236,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1793995200,
+          "price": 147.3410331566462,
+          "mid": 147.3248274256294,
+          "units": 1000.0,
+          "pnl": -1.8522654660145477,
+          "reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": -1.8522654660145477,
+      "unrealized_pnl": 0,
+      "last_bar": 1793991600,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+      "events": [
+        {
+          "time": 1793905200,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1793995200,
+          "action": "PREDECLARED_END_OF_TEST_LIQUIDATION"
+        }
+      ],
+      "entry_mid": 147.09505118233236,
+      "entry_fill": 147.0788707267023,
+      "entered_at": 1793905200,
+      "last_price": 147.3248274256294,
+      "closed_at": 1793995200
+    },
+    {
+      "id": "83199136-d076-4690-8ae7-223b8c0dba62",
+      "signal_id": "confluence-v2.0:SIMULATED:USD/JPY:1h:1793995200:6b0ebd47fa51:close",
+      "symbol": "USD/JPY",
+      "interval": "1h",
+      "direction": "SELL",
+      "status": "CLOSED",
+      "approved_at": 1793998800,
+      "expires_at": "2026-11-06T23:00:00+00:00",
+      "stop": 147.90419572727336,
+      "initial_stop": 147.90419572727336,
+      "target1": 145.45305497147066,
+      "target2": 144.63600805286976,
+      "entry_reference": 147.12981645544454,
+      "entry_zone": [
+        147.0949759095069,
+        147.16465700138218
+      ],
+      "quote_to_usd": 0.006796718871071459,
+      "costs": {
+        "spread_bps": 1.2,
+        "slippage_bps": 0.5,
+        "commission_per_unit": 3.5e-05,
+        "min_units": 1000.0,
+        "unit_step": 1000.0,
+        "lot_units": 100000.0,
+        "min_volume": 0.0,
+        "validated": true,
+        "asof": 0,
+        "valid_until": 1794585600
+      },
+      "settings": {
+        "equity": 10000,
+        "allocation": 1000,
+        "risk_pct": 1,
+        "rr": 2,
+        "leverage": 1,
+        "max_open_positions": 3,
+        "max_exposure_pct": 100,
+        "max_portfolio_risk_pct": 3,
+        "daily_loss_pct": 3,
+        "emergency_stop": false,
+        "signal_ttl_bars": 2,
+        "min_score": 65,
+        "max_cost_risk_ratio": 0.2,
+        "max_atr_pct": 5,
+        "require_event_coverage": true,
+        "allow_short": true
+      },
+      "data_mode": "SIMULATED",
+      "units": 1000.0,
+      "remaining_units": 0,
+      "risk_usd": 5.55323821020552,
+      "notional_usd": 1000.0000000000001,
+      "margin_usd": 1000.0000000000001,
+      "fills": [
+        {
+          "kind": "entry",
+          "time": 1793998800,
+          "price": 147.11363217563445,
+          "mid": 147.12981645544454,
+          "units": 1000.0,
+          "fee_usd": 0.034999999999999996
+        },
+        {
+          "kind": "exit",
+          "time": 1794499200,
+          "price": 146.06980642786303,
+          "mid": 146.05374051640624,
+          "units": 1000.0,
+          "pnl": 7.024590157988299,
+          "reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+          "fee_usd": 0.034999999999999996
+        }
+      ],
+      "pnl": 7.024590157988299,
+      "unrealized_pnl": 0,
+      "last_bar": 1794495600,
+      "exit_recommendation": "CLOSE",
+      "exit_reason": "PREDECLARED_END_OF_TEST_LIQUIDATION",
+      "events": [
+        {
+          "time": 1793998800,
+          "action": "APPROVED_PAPER_ONLY"
+        },
+        {
+          "time": 1794499200,
+          "action": "PREDECLARED_END_OF_TEST_LIQUIDATION"
+        }
+      ],
+      "entry_mid": 147.12981645544454,
+      "entry_fill": 147.11363217563445,
+      "entered_at": 1793998800,
+      "last_price": 146.05374051640624,
+      "closed_at": 1794499200
+    }
+  ],
+  "assumptions": {
+    "data_mode": "SIMULATED",
+    "market_status": "open",
+    "costs": {
+      "spread_bps": 1.2,
+      "slippage_bps": 0.5,
+      "commission_per_unit": 3.5e-05,
+      "min_units": 1000.0,
+      "unit_step": 1000.0,
+      "lot_units": 100000.0,
+      "min_volume": 0.0,
+      "validated": true,
+      "asof": 0,
+      "valid_until": 1794585600
+    },
+    "cost_source": "SIMULATED ASSUMPTIONS",
+    "events": {
+      "coverage": "complete",
+      "asof": 0,
+      "valid_until": 1794585600,
+      "items": []
+    },
+    "conversion": {
+      "quote_to_usd": 0.0065,
+      "asof": 0,
+      "valid_until": 1794585600
+    }
+  },
+  "limitations": [
+    "No profitability claim. Untested with a licensed historical feed.",
+    "Stop-first for ambiguous OHLC; entry only at a subsequent bar open inside entry zone.",
+    "Spread, slippage and per-unit commissions modeled on both sides; no borrow fees, financing or market impact.",
+    "Daily loss uses UTC day; conversion held at entry snapshot.",
+    "Fixed universe has survivorship/selection bias; corporate actions require point-in-time adjusted OHLC.",
+    "Realized drawdown excludes intratrade equity moves. Fold capital resets; aggregate cashflow curve is not a compounded portfolio.",
+    "No historical events/costs may be inferred from future information. Missing required coverage blocks signals."
+  ],
+  "id": "synthetic-walk-forward-v2",
+  "created_at": 1794499200
+}
