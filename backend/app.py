@@ -122,4 +122,7 @@ register(app,authorize)
 from .api_v3 import register as register_v3
 register_v3(app)
 
+from .customers import register as register_customers
+register_customers(app)
+
 app.mount('/',StaticFiles(directory='dist',html=True),name='dashboard')
