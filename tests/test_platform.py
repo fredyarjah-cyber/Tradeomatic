@@ -76,3 +76,32 @@ def test_provider_closed_candle_filter(monkeypatch):
     monkeypatch.setattr(httpx.AsyncClient,'get',AsyncMock(return_value=response))
     bars,mode=asyncio.run(fetch('EUR/USD','1h'))
     assert len(bars)==1 and bars[0]['time']==int(recent.timestamp()) and mode=='DELAYED'
+
+@pytest.mark.parametrize('symbol', ['TSLA','AMD','NFLX','AVGO','ORCL','CRM','JPM','BAC','V','MA','WMT','COST','XOM','CVX'])
+def test_expanded_stock_selection_scans_only_requested_stock(symbol):
+    with TestClient(app) as c:
+        old_engine = db.engine
+        db.engine = create_engine('sqlite://', connect_args={'check_same_thread':False}, poolclass=StaticPool)
+        try:
+            db.init()
+            headers = {'Authorization':'Bearer '+'a'*40}
+            response = c.post('/api/scanner', headers=headers, json={'enabled':True,'symbols':[symbol],'intervals':['1h']})
+            assert response.status_code == 200
+            asyncio.run(scan_once())
+            rows = db.listing('quotes')
+            assert len(rows) == 1 and rows[0]['symbol'] == symbol
+            assert rows[0]['mode'] == 'SIMULATED' and rows[0]['status'] == 'ok'
+            assert c.post('/api/orders',headers=headers).status_code == 403
+        finally:
+            db.engine.dispose()
+            db.engine = old_engine
+
+
+def test_browser_and_backend_instrument_lists_match():
+    import ast, re
+    from pathlib import Path
+    source = Path('src/app.jsx').read_text()
+    stocks = ast.literal_eval(re.search(r'const stocks=(\[[^;]+\]);', source)[1])
+    pairs = ast.literal_eval(re.search(r'const pairs=(\[[^;]+\]);', source)[1])
+    assert pairs + stocks == SYMBOLS
+    assert len(stocks) == 24 and len(SYMBOLS) == len(set(SYMBOLS)) == 52
