@@ -17,9 +17,14 @@ class PaperAction(BaseModel):
 class Event(BaseModel):
     model_config=ConfigDict(extra='forbid',allow_inf_nan=False)
     title:str=Field(max_length=120);time:float;known_at:float;importance:Literal['high','medium','low'];blackout_seconds:int=Field(1800,ge=0,le=86400)
+    time_precision:Literal['exact','estimated','date_only','unknown']='unknown'
 class Events(BaseModel):
     model_config=ConfigDict(extra='forbid',allow_inf_nan=False)
     coverage:Literal['complete','unknown']='unknown';asof:float=0;valid_until:float=0;items:list[Event]=Field(default_factory=list,max_length=100)
+    source:str=Field('',max_length=160)
+    covered_symbols:list[str]=Field(default_factory=list,max_length=52)
+    window_start:float|None=None
+    window_end:float|None=None
 class Conversion(BaseModel):
     model_config=ConfigDict(extra='forbid',allow_inf_nan=False)
     quote_to_usd:float=Field(gt=0);asof:float;valid_until:float
