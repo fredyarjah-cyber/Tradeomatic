@@ -143,3 +143,17 @@ def test_review_checks_all_rows_before_display_truncation():
 @pytest.mark.parametrize('value',[float('nan'),float('inf'),True,None])
 def test_review_invalid_clock_rejected(value):
     with pytest.raises(fmp.CalendarError):fmp.review([],value,100)
+
+@pytest.mark.parametrize('status,fragment',[
+    (402,'eligible subscription'),(404,'endpoint not found'),
+    (429,'request limit'),(500,'request failed'),(503,'request failed'),
+    (301,'request failed'),(401,'access denied'),(403,'access denied')])
+def test_safe_http_status_diagnostics(configured,status,fragment):
+    def respond(request):
+        return httpx.Response(status,text='private-calendar-test-key sensitive provider body')
+    with pytest.raises(fmp.CalendarError) as exc:
+        asyncio.run(fmp.preview('EUR/USD',httpx.MockTransport(respond)))
+    message=str(exc.value)
+    assert f'HTTP {status}' in message and fragment in message
+    assert 'private-calendar-test-key' not in message
+    assert 'sensitive provider body' not in message and 'apikey' not in message

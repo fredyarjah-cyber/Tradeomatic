@@ -99,9 +99,13 @@ async def preview(symbol,transport=None):
         async with httpx.AsyncClient(timeout=20,follow_redirects=False,transport=transport) as client:
             response=await client.get(ENDPOINT,params={'from':start,'to':end,'apikey':key})
         if response.status_code in (401,403):
-            raise CalendarError('FMP calendar access denied; verify the server key and calendar plan entitlement')
-        if response.status_code==429:raise CalendarError('FMP request limit reached; retry later')
-        if response.status_code!=200:raise CalendarError('FMP calendar provider is unavailable')
+            raise CalendarError(f'FMP calendar access denied (HTTP {response.status_code}); verify the server key and calendar plan entitlement')
+        if response.status_code==402:
+            raise CalendarError('FMP calendar access requires an eligible subscription (HTTP 402); confirm calendar entitlement with FMP')
+        if response.status_code==404:
+            raise CalendarError('FMP calendar endpoint not found (HTTP 404); report this error for connector review')
+        if response.status_code==429:raise CalendarError('FMP request limit reached (HTTP 429); retry later')
+        if response.status_code!=200:raise CalendarError(f'FMP calendar request failed (HTTP {response.status_code}); report this status for diagnosis')
         if len(response.content)>2000000:raise CalendarError('FMP calendar response exceeds the preview size limit')
         result=normalize(response.json(),now,start,end)
         if contains_key(result,key):raise CalendarError('FMP response withheld to protect credentials')
