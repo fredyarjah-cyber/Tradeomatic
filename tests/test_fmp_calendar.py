@@ -100,3 +100,10 @@ def test_utc_and_offset_dates_agree_and_unknown_impact_stays_unknown():
 
 def test_nonlist_error_payload_is_rejected():
     with pytest.raises(fmp.CalendarError):fmp.normalize({'error':'private'},1,'a','b')
+
+def test_escaped_key_echo_is_withheld(configured,monkeypatch):
+    key='quote"private-key'
+    monkeypatch.setenv('FMP_API_KEY',key)
+    def respond(request):return httpx.Response(200,json=[{**ROW,'event':key}])
+    with pytest.raises(fmp.CalendarError,match='protect credentials'):
+        asyncio.run(fmp.preview('EUR/USD',httpx.MockTransport(respond)))

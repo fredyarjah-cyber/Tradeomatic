@@ -1,5 +1,4 @@
 """Manual owner-only calendar preview. No database or recommendation writes."""
-import json
 import math
 import os
 import time
@@ -60,6 +59,12 @@ def normalize(rows,now,start,end):
                               'Snapshot completeness and update cadence verification'],
             'note':'Preview only; estimate/actual economic figures do not confirm release timestamps. No scanner or order changes.'}
 
+def contains_key(value,key):
+    if isinstance(value,str):return key in value
+    if isinstance(value,dict):return any(contains_key(v,key) for v in value.values())
+    if isinstance(value,list):return any(contains_key(v,key) for v in value)
+    return False
+
 async def preview(symbol,transport=None):
     if symbol!='EUR/USD':raise CalendarError('The calendar preview pilot supports EUR/USD only')
     state=readiness()
@@ -78,7 +83,7 @@ async def preview(symbol,transport=None):
         if response.status_code!=200:raise CalendarError('FMP calendar provider is unavailable')
         if len(response.content)>2000000:raise CalendarError('FMP calendar response exceeds the preview size limit')
         result=normalize(response.json(),now,start,end)
-        if key in json.dumps(result):raise CalendarError('FMP response withheld to protect credentials')
+        if contains_key(result,key):raise CalendarError('FMP response withheld to protect credentials')
         return result
     except CalendarError:
         raise
