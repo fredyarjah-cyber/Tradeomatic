@@ -33,6 +33,30 @@ def number(value, positive=False):
         raise MarketDataError('OANDA returned invalid market values') from None
 
 
+def financing_observation(meta):
+    """Optional provider evidence only. Invalid/missing data never means free financing."""
+    raw=meta.get('financing')
+    if raw is None:return {'status':'unavailable','details':None}
+    try:
+        def rate(value):
+            if isinstance(value,bool):raise ValueError()
+            result=float(value)
+            if not math.isfinite(result):raise ValueError()
+            return result
+        long_rate=rate(raw['longRate']);short_rate=rate(raw['shortRate'])
+        schedule=raw['financingDaysOfWeek']
+        days={'MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'}
+        if not isinstance(schedule,list) or not 1<=len(schedule)<=7:raise ValueError()
+        seen=set();normalized=[]
+        for item in schedule:
+            day=item['dayOfWeek'];count=item['daysCharged']
+            if day not in days or day in seen or type(count) is not int or count<0:raise ValueError()
+            seen.add(day);normalized.append({'day':day,'days_charged':count})
+        return {'status':'reported','details':{'long_rate':long_rate,'short_rate':short_rate,'schedule':normalized}}
+    except (KeyError,TypeError,ValueError,OverflowError):
+        return {'status':'invalid','details':None}
+
+
 def normalize(symbol, summary, instruments, pricing, now, environment):
     try:
         if summary['account']['currency']!='USD':raise MarketDataError('Only USD account cost conversion is supported')
@@ -72,7 +96,7 @@ def normalize(symbol, summary, instruments, pricing, now, environment):
                 'bid_liquidity_units':bid_liquidity,'ask_liquidity_units':ask_liquidity,
                 'quote_to_usd':q,'min_units':number(meta['minimumTradeSize'],True),
                 'unit_step':10**-precision,'max_units':number(meta['maximumOrderUnits'],True),
-                'commission':commission,'costs_validated':False,
+                'commission':commission,'financing':financing_observation(meta),'costs_validated':False,
                 'pending_checks':['Slippage model review','Financing/holding-cost review','Economic-event coverage']+
                     (['Commission schedule unavailable'] if commission is None else ['Minimum-commission model review'] if commission['minimum_per_fill']>0 else [])}
     except MarketDataError:
