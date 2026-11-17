@@ -10,7 +10,8 @@
     "build": "esbuild src/app.jsx --bundle --minify --outfile=dist/app.js",
     "test": "python -m pytest -q",
     "test:ui": "esbuild tests/paper-demo.test.mjs --bundle --platform=node --format=esm --outfile=.test-build/paper-demo.mjs && node --test .test-build/paper-demo.mjs",
-    "test:push": "node --test tests/push-worker.test.mjs"
+    "test:push": "node --test tests/push-worker.test.mjs",
+    "test:financing": "node --test tests/financing-scenario.test.mjs"
   },
   "keywords": [],
   "author": "",
