@@ -56,6 +56,19 @@ def register(app):
         from . import oanda_commission, oanda_market
         try:return oanda_commission.revoke(body)
         except oanda_market.MarketDataError as e:raise HTTPException(422,str(e))
+    @router.get('/calendar/fmp')
+    def fmp_calendar_status(response:Response):
+        from . import fmp_calendar
+        response.headers['Cache-Control']='no-store'
+        return fmp_calendar.readiness()
+    @router.post('/calendar/fmp/preview')
+    async def fmp_calendar_preview(body:dict,response:Response):
+        from . import fmp_calendar
+        response.headers['Cache-Control']='no-store'
+        response.headers['Pragma']='no-cache'
+        if body!={'symbol':'EUR/USD'}:raise HTTPException(422,'Choose the EUR/USD calendar pilot',headers={'Cache-Control':'no-store'})
+        try:return await fmp_calendar.preview(body['symbol'])
+        except fmp_calendar.CalendarError as e:raise HTTPException(422,str(e),headers={'Cache-Control':'no-store'})
     @router.get('/state')
     def state():
         return {'controls':controls.get(),'preferences':notifications.preferences(),'events':sorted(db.listing('notifications'),key=lambda x:x['created_at'],reverse=True)[:200],'devices':[{k:d[k] for k in ('id','label','enabled')} for d in db.listing('push_devices')],'deliveries':[{k:v for k,v in x.items() if k not in ('claim',)} for x in db.listing('push_delivery')],'brokers':brokers.status(),'broker_state':{n:db.get('broker_state',n) for n in ('OANDA_PRACTICE','ALPACA_PAPER')},'orders':db.listing('broker_orders'),'intents':db.listing('intents'),'health':{n:db.get('health',n) for n in ('worker','notifications','assistant')},**security.readiness()}
