@@ -166,3 +166,23 @@ def test_protection_requires_active_correct_side_and_sufficient_quantity():
     p={'symbol':'AAPL','qty':'10'};stop={'symbol':'AAPL','type':'stop','side':'sell','qty':'10','filled_qty':'0','status':'new'}
     assert brokers.alpaca_protected(p,[stop])
     for change in [{'status':'held'},{'status':'canceled'},{'side':'buy'},{'qty':'9'}]:assert not brokers.alpaca_protected(p,[{**stop,**change}])
+
+
+def test_oanda_market_data_requires_mfa_and_csrf(monkeypatch):
+    from backend import oanda_market
+    monkeypatch.setenv('PUBLIC_ORIGIN','https://testserver')
+    secret=owner()
+    refresh=AsyncMock(return_value={'symbol':'EUR/USD','costs_validated':False})
+    monkeypatch.setattr(oanda_market,'refresh',refresh)
+    with TestClient(app,base_url='https://testserver') as c:
+        assert c.get('/api/v3/market-data/oanda').status_code==401
+        assert c.post('/api/v3/market-data/oanda/refresh',json={'symbol':'EUR/USD'}).status_code==401
+        r=c.post('/api/v3/login',json={'username':'test-owner','password':'a-local-test-password','otp':pyotp.TOTP(secret).now()},headers={'Origin':'https://testserver'})
+        assert r.status_code==200
+        assert c.get('/api/v3/market-data/oanda').status_code==200
+        assert c.post('/api/v3/market-data/oanda/refresh',json={'symbol':'EUR/USD'}).status_code==403
+        refresh.assert_not_awaited()
+        result=c.post('/api/v3/market-data/oanda/refresh',json={'symbol':'EUR/USD'},headers={'Origin':'https://testserver','X-CSRF-Token':r.json()['csrf']})
+        assert result.status_code==200 and result.json()['costs_validated'] is False
+        refresh.assert_awaited_once_with('EUR/USD')
+        assert not db.listing('broker_orders') and not db.listing('paper')
