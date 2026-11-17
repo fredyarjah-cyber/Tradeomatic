@@ -129,10 +129,15 @@ async def observe(symbol, transport=None):
         raise MarketDataError('OANDA market-data connection unavailable; credentials and transport details withheld') from None
 
 
+def public_observation(value):
+    return {k:v for k,v in value.items() if not k.startswith('_')}
+
 async def refresh(symbol):
     value=await observe(symbol)
+    from . import oanda_commission
+    if value.get('environment')=='practice':value['_account_binding']=oanda_commission.binding()
     # Observation evidence only: do not mark execution assumptions validated,
     # modify price_ticks/order inputs, or fabricate complete event coverage.
     db.put('market_observations','OANDA:'+symbol,value)
     db.audit('OANDA_MARKET_OBSERVATION',symbol)
-    return value
+    return public_observation(value)

@@ -38,12 +38,23 @@ def register(app):
     @router.get('/market-data/oanda')
     def oanda_status():
         from . import oanda_market
-        return {**oanda_market.readiness(),'observations':db.listing('market_observations')}
+        from . import oanda_commission
+        return {**oanda_market.readiness(),'observations':[oanda_market.public_observation(x) for x in db.listing('market_observations')],'commission_review':oanda_commission.review()}
     @router.post('/market-data/oanda/refresh')
     async def oanda_refresh(body:dict):
         from . import oanda_market
         if set(body)!={'symbol'} or not isinstance(body.get('symbol'),str):raise HTTPException(422,'Choose one Forex symbol')
         try:return await oanda_market.refresh(body['symbol'])
+        except oanda_market.MarketDataError as e:raise HTTPException(422,str(e))
+    @router.post('/market-data/oanda/commission-review')
+    def oanda_commission_save(body:dict):
+        from . import oanda_commission, oanda_market
+        try:return oanda_commission.save(body)
+        except oanda_market.MarketDataError as e:raise HTTPException(422,str(e))
+    @router.post('/market-data/oanda/commission-review/revoke')
+    def oanda_commission_revoke(body:dict):
+        from . import oanda_commission, oanda_market
+        try:return oanda_commission.revoke(body)
         except oanda_market.MarketDataError as e:raise HTTPException(422,str(e))
     @router.get('/state')
     def state():
