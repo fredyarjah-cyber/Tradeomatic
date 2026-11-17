@@ -20,3 +20,9 @@ References:
 - https://site.financialmodelingprep.com/terms-of-service
 
 The response-only design avoids adding a persistent provider-data store. It is not a substitute for reviewing all applicable data-retention and subscription terms.
+
+## Calendar review
+
+The manual response now includes a five-minute freshness review, potential full UTC-day cautions for high or unknown impact events, and explicit unresolved checks. Review uses all normalized matching rows before the 100-row display limit. Missing currencies and truncation are flagged. Exact event timing and snapshot completeness remain unverified; no empty response or economic actual value certifies approval.
+
+This review remains response-only research. It does not save calendar data, populate validated context, change scanner configuration, or enable orders. The existing event-coverage and approval gates remain in force. A calendar-to-scanner integration still requires a verified coverage/update policy and treatment of unavailable release-time status.

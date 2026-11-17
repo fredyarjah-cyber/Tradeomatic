@@ -17,6 +17,26 @@ def readiness():
             'coverage':'unknown','timing_precision':'unknown','retention':'response_only',
             'pilot_symbol':'EUR/USD','orders_enabled':False}
 
+def review(items,now,retrieved_at,*,incomplete=False):
+    """Research review only. Unknown release timing cannot certify paper approval."""
+    if not all(type(v) in (int,float) and math.isfinite(v) for v in (now,retrieved_at)):
+        raise CalendarError('Invalid calendar review timestamp')
+    age=now-retrieved_at
+    fresh=0<=age<=300
+    blocks=[]
+    for event in items:
+        # UTC-day caution avoids treating an unconfirmed clock time as exact.
+        if event['importance'] in ('high','unknown') and int(event['time']//86400)==int(now//86400):
+            blocks.append({'title':event['title'],'currency':event['currency'],
+                           'reason':'High or unknown impact with unverified timing on this UTC date'})
+    issues=['Release-time status is unavailable; exact event timing cannot be verified',
+            'Snapshot completeness and update cadence are not verified']
+    if not fresh:issues.append('Calendar review is stale or future-dated')
+    if incomplete:issues.append('Some rows are missing currency or the preview is truncated')
+    return {'fresh':fresh,'expires_at':retrieved_at+300,'paper_approval_ready':False,
+            'potential_blocks':blocks,'issues':issues,
+            'scope':'Research review only; scanner and order checks are unchanged'}
+
 def normalize(rows,now,start,end):
     if not isinstance(rows,list) or len(rows)>1000:
         raise CalendarError('FMP calendar response is unavailable or exceeds the preview limit')
@@ -49,15 +69,16 @@ def normalize(rows,now,start,end):
     except (ValueError,TypeError,KeyError,OverflowError):
         raise CalendarError('FMP returned incomplete or invalid calendar fields; details withheld') from None
     items.sort(key=lambda event:event['time'])
-    return {'source':'FMP economic calendar','requested_symbol':'EUR/USD','retrieved_at':now,
+    result={'source':'FMP economic calendar','requested_symbol':'EUR/USD','retrieved_at':now,
             'requested_from':start,'requested_to':end,'coverage':'unknown','covered_symbols':[],
             'research_only':True,'retention':'response_only','received_count':len(rows),
             'unknown_currency_count':unknown_currency,'excluded_other_currency_count':excluded,
             'matching_count':len(items),'preview_truncated':len(items)>100,'preview_items':items[:100],
-            'pending_checks':['U.S. and euro-area event coverage confirmation',
-                              'Confirmed versus tentative release-time semantics',
+            'pending_checks':['Release-time status unavailable from this provider',
                               'Snapshot completeness and update cadence verification'],
             'note':'Preview only; estimate/actual economic figures do not confirm release timestamps. No scanner or order changes.'}
+    result['review']=review(items,now,now,incomplete=bool(unknown_currency or len(items)>100))
+    return result
 
 def contains_key(value,key):
     if isinstance(value,str):return key in value

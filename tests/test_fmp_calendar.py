@@ -107,3 +107,39 @@ def test_escaped_key_echo_is_withheld(configured,monkeypatch):
     def respond(request):return httpx.Response(200,json=[{**ROW,'event':key}])
     with pytest.raises(fmp.CalendarError,match='protect credentials'):
         asyncio.run(fmp.preview('EUR/USD',httpx.MockTransport(respond)))
+
+def test_review_blocks_unknown_time_for_entire_utc_day():
+    at=1794922200  # same UTC day is calculated from the normalized event
+    item={'title':'Release','currency':'USD','importance':'high','time':at}
+    start=int(at//86400)*86400
+    for now in (start,start+86399):
+        result=fmp.review([item],now,now)
+        assert result['fresh'] and not result['paper_approval_ready']
+        assert len(result['potential_blocks'])==1
+    assert not fmp.review([item],start+86400,start+86400)['potential_blocks']
+
+@pytest.mark.parametrize('impact,expected',[('high',1),('unknown',1),('medium',0),('low',0)])
+def test_review_impact_caution(impact,expected):
+    item={'title':'Release','currency':'EUR','importance':impact,'time':100000}
+    result=fmp.review([item],100000,100000)
+    assert len(result['potential_blocks'])==expected
+    assert not result['paper_approval_ready']
+
+@pytest.mark.parametrize('now,fresh',[(100,True),(400,True),(401,False),(99,False)])
+def test_review_expires_and_rejects_future_snapshot(now,fresh):
+    result=fmp.review([],now,100)
+    assert result['fresh'] is fresh
+    assert result['expires_at']==400 and not result['paper_approval_ready']
+
+def test_review_checks_all_rows_before_display_truncation():
+    rows=[{**ROW,'impact':'Low'}]*100+[ROW]
+    now=fmp.datetime.fromisoformat(ROW['date']).replace(tzinfo=fmp.timezone.utc).timestamp()
+    result=fmp.normalize(rows,now,'2026-11-16','2026-11-18')
+    assert result['preview_truncated']
+    assert len(result['review']['potential_blocks'])==1
+    assert any('truncated' in issue for issue in result['review']['issues'])
+    assert result['review']['paper_approval_ready'] is False
+
+@pytest.mark.parametrize('value',[float('nan'),float('inf'),True,None])
+def test_review_invalid_clock_rejected(value):
+    with pytest.raises(fmp.CalendarError):fmp.review([],value,100)
