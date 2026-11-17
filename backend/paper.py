@@ -1,7 +1,7 @@
 """Deterministic paper ledger and conservative completed-OHLC execution model."""
 import copy, uuid
 from datetime import datetime, timezone
-from .intelligence import iso, timestamp, size_position, RiskSettings
+from .intelligence import iso, timestamp, size_position, RiskSettings, commission_fee, commission_reserve
 from .engine import INTERVALS
 ACTIVE=('PENDING_ENTRY','OPEN','PARTIAL')
 
@@ -29,9 +29,9 @@ def friction(t,price):return price*(t['costs']['spread_bps']/2+t['costs']['slipp
 
 def close_leg(t,price,units,at,reason):
     sign=1 if t['direction']=='BUY' else -1
-    fill=price-sign*friction(t,price);q=t['quote_to_usd'];fee=units*t['costs']['commission_per_unit']
+    fill=price-sign*friction(t,price);q=t['quote_to_usd'];fee=commission_fee(t['costs'],units)
     # Allocate entry commission to each exit leg; metrics include both sides.
-    pnl=sign*(fill-t['entry_fill'])*units*q-fee-units*t['costs']['commission_per_unit']
+    pnl=sign*(fill-t['entry_fill'])*units*q-fee-commission_fee(t['costs'],t['units'])*units/t['units']
     t['fills'].append({'kind':'exit','time':at,'price':fill,'mid':price,'units':units,'pnl':pnl,'reason':reason,'fee_usd':fee})
     t['pnl']+=pnl;t['remaining_units']=max(0,t['remaining_units']-units)
     t['events'].append({'time':at,'action':reason})
@@ -62,11 +62,11 @@ def advance(trade,bars,now,settings=None,portfolio=None,features=None):
             if binding and sized['units']!=binding['units']:
                 t.update(status='INVALIDATED',exit_reason='Approved quantity no longer passes risk checks; new approval required');break
             t.update(units=min(t['units'],sized['units']),entry_mid=b['open'],entry_fill=b['open']+sign*friction(t,b['open']),entered_at=at,status='OPEN')
-            t['remaining_units']=t['units'];t['risk_usd']=sized['risk_usd']*t['units']/sized['units'];t['notional_usd']=t['units']*b['open']*t['quote_to_usd'];t['margin_usd']=t['notional_usd']/s.leverage
-            expected_risk=abs(b['open']-t['stop'])+2*friction(t,b['open'])+2*t['costs']['commission_per_unit']/t['quote_to_usd']
-            reward=sign*(t['target1']-b['open'])-2*friction(t,b['open'])-2*t['costs']['commission_per_unit']/t['quote_to_usd']
+            t['remaining_units']=t['units'];t['risk_usd']=t['units']*(abs(b['open']-t['stop'])+2*friction(t,b['open']))*t['quote_to_usd']+commission_reserve(t['costs'],t['units']);t['notional_usd']=t['units']*b['open']*t['quote_to_usd'];t['margin_usd']=t['notional_usd']/s.leverage
+            expected_risk=abs(b['open']-t['stop'])+2*friction(t,b['open'])+commission_reserve(t['costs'],t['units'])/t['units']/t['quote_to_usd']
+            reward=sign*(t['target1']-b['open'])-2*friction(t,b['open'])-commission_reserve(t['costs'],t['units'])/t['units']/t['quote_to_usd']
             if reward/expected_risk<s.rr*.999:t.update(status='REJECTED',exit_reason='Entry gap violates minimum net reward/risk');break
-            t['fills'].append({'kind':'entry','time':at,'price':t['entry_fill'],'mid':b['open'],'units':t['units'],'fee_usd':t['units']*t['costs']['commission_per_unit']})
+            t['fills'].append({'kind':'entry','time':at,'price':t['entry_fill'],'mid':b['open'],'units':t['units'],'fee_usd':commission_fee(t['costs'],t['units'])})
         if t.get('close_requested_at') is not None and at>=t['close_requested_at']:
             close_leg(t,b['open'],t['remaining_units'],at,'USER_PAPER_CLOSE');break
         stop_hit=b['low']<=t['stop'] if sign==1 else b['high']>=t['stop']
@@ -83,7 +83,7 @@ def advance(trade,bars,now,settings=None,portfolio=None,features=None):
             t.update(exit_recommendation='PARTIAL EXIT',exit_reason='Target 1 reached; model took half only if broker minimums permit')
         if target2_hit:
             close_leg(t,t['target2'],t['remaining_units'],at,'TAKE_PROFIT_2');break
-        t['last_price']=b['close'];t['unrealized_pnl']=sign*(b['close']-sign*friction(t,b['close'])-t['entry_fill'])*t['remaining_units']*t['quote_to_usd']-2*t['remaining_units']*t['costs']['commission_per_unit']
+        t['last_price']=b['close'];t['unrealized_pnl']=sign*(b['close']-sign*friction(t,b['close'])-t['entry_fill'])*t['remaining_units']*t['quote_to_usd']-commission_fee(t['costs'],t['remaining_units'])-commission_fee(t['costs'],t['units'])*t['remaining_units']/t['units']
         f=features or {}
         if s.emergency_stop:t.update(exit_recommendation='CLOSE',exit_reason='Emergency stop enabled. Existing paper position remains monitored; approve paper close explicitly.')
         elif f.get('ema20') and sign*(b['close']-f['ema20'])<0 and sign*f.get('macd_histogram',0)<0:t.update(exit_recommendation='CLOSE',exit_reason='Price and momentum moved against the position')
