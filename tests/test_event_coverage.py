@@ -21,7 +21,7 @@ def test_scoped_empty_snapshot_is_accepted_without_mutation():
     {'window_start':1000000-86399},{'window_end':1000000+86399},
     {'asof':1000001},{'asof':1000000-MAX_SNAPSHOT_AGE-1},
     {'valid_until':999999},{'valid_until':float('inf')},{'window_start':float('nan')},
-    {'items':None},{'items':[None]},{'items':[{}]},{'asof':True}
+    {'items':None},{'items':[None]},{'items':[{}]},{'asof':True},{'asof':10**400}
 ])
 def test_incomplete_or_invalid_real_coverage_is_rejected(change):
     assert not assess('EUR/USD',{**snapshot(),**change},1000000,'REAL-TIME')['complete']

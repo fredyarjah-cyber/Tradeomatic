@@ -5,7 +5,8 @@ MAX_SNAPSHOT_AGE=900
 MAX_BLACKOUT=86400
 
 def finite(value):
-    return type(value) in (int,float) and math.isfinite(value)
+    try:return type(value) in (int,float) and math.isfinite(value)
+    except (ValueError,OverflowError):return False
 
 def assess(symbol,news,now,mode):
     issues=[];blackouts=[]
