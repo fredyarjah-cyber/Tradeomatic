@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_FLOOR
 from pydantic import BaseModel, Field, ConfigDict
 from .engine import analyze, ema, INTERVALS
 
-VERSION='confluence-v2.1'
+VERSION='confluence-v2.2'
 HIGHER={'5min':'15min','15min':'1h','30min':'4h','1h':'4h','4h':'1day','1day':None}
 
 def iso(t): return datetime.fromtimestamp(t,timezone.utc).isoformat()
@@ -154,12 +154,13 @@ def recommend(symbol,interval,bars,higher_bars,settings=None,context=None,portfo
     if mode not in ('SIMULATED','REAL-TIME') and not (ctx.get('historical_replay') and mode=='HISTORICAL'):reject.append('Delayed or unknown data is research-only')
     if now>expiry:reject.append('Signal or price data has expired')
     if not c.validated or c.asof>now or c.valid_until<now:reject.append('Current validated cost/liquidity assumptions unavailable')
-    news=ctx.get('events',{})
-    coverage=news.get('asof',float('inf'))<=now and news.get('valid_until',0)>=now and news.get('coverage')=='complete'
-    if s.require_event_coverage and not coverage:reject.append('Economic/news/earnings coverage unavailable or stale')
-    for event in news.get('items',[]):
-        if event.get('known_at',float('inf'))>now:continue
-        if abs(event['time']-now)<=event.get('blackout_seconds',1800) and event.get('importance')=='high':reject.append('High-impact event blackout: '+str(event.get('title','scheduled event'))[:120])
+    from .event_coverage import assess
+    event_review=assess(symbol,ctx.get('events',{}),now,mode)
+    out['event_coverage_review']=event_review
+    if s.require_event_coverage and not event_review['complete']:
+        reject.append('Economic/news/earnings coverage unavailable or stale')
+        reject.extend(event_review['issues'])
+    reject.extend(event_review['blackouts'])
     if f and h:
         price=visible[-1]['close'];atr=f['atr'];vol=atr/price*100;sign=1 if price>f['ema20']>f['ema50'] else -1 if price<f['ema20']<f['ema50'] else 0
         direction='BUY' if sign==1 else 'SELL' if sign==-1 else 'NO TRADE'
