@@ -101,3 +101,60 @@ def test_refresh_does_not_write_executable_quotes_or_context(configured,monkeypa
     monkeypatch.setattr(om.db,'audit',lambda *args:None)
     asyncio.run(om.refresh('EUR/USD'))
     assert len(calls)==1 and calls[0][0]=='market_observations'
+
+
+def financing_payload():
+    return {'longRate':'-0.051','shortRate':'0.012','financingDaysOfWeek':[
+        {'dayOfWeek':'MONDAY','daysCharged':1},
+        {'dayOfWeek':'WEDNESDAY','daysCharged':3},
+        {'dayOfWeek':'SATURDAY','daysCharged':0}]}
+
+
+def test_financing_preserves_signed_rates_and_provider_schedule():
+    result=om.financing_observation({'financing':financing_payload()})
+    assert result['status']=='reported'
+    assert result['details']['long_rate']==-.051
+    assert result['details']['short_rate']==.012
+    assert result['details']['schedule'][1]=={'day':'WEDNESDAY','days_charged':3}
+    assert result['details']['schedule'][2]['days_charged']==0
+
+
+def test_financing_missing_is_distinct_from_reported_zero():
+    assert om.financing_observation({})=={'status':'unavailable','details':None}
+    data=financing_payload();data['longRate']='0';data['shortRate']='0'
+    result=om.financing_observation({'financing':data})
+    assert result['status']=='reported' and result['details']['long_rate']==0
+
+
+@pytest.mark.parametrize('change',['nan','inf','bool_rate','missing_rate','missing_schedule','empty','duplicate','bad_day','negative_days','fractional_days','bool_days','string_days'])
+def test_invalid_financing_does_not_expose_raw_values_or_certify_costs(change):
+    data=financing_payload()
+    if change=='nan':data['longRate']='NaN'
+    if change=='inf':data['shortRate']='Infinity'
+    if change=='bool_rate':data['longRate']=False
+    if change=='missing_rate':data.pop('longRate')
+    if change=='missing_schedule':data.pop('financingDaysOfWeek')
+    if change=='empty':data['financingDaysOfWeek']=[]
+    if change=='duplicate':data['financingDaysOfWeek'].append(data['financingDaysOfWeek'][0])
+    if change=='bad_day':data['financingDaysOfWeek'][0]['dayOfWeek']='PRIVATE_RESPONSE'
+    if change=='negative_days':data['financingDaysOfWeek'][0]['daysCharged']=-1
+    if change=='fractional_days':data['financingDaysOfWeek'][0]['daysCharged']=1.5
+    if change=='bool_days':data['financingDaysOfWeek'][0]['daysCharged']=True
+    if change=='string_days':data['financingDaysOfWeek'][0]['daysCharged']='1'
+    summary,instruments,pricing=payloads(time.time())
+    instruments['instruments'][0]['financing']=data
+    result=om.normalize('EUR/USD',summary,instruments,pricing,time.time(),'practice')
+    assert result['financing']=={'status':'invalid','details':None}
+    assert result['bid']>0 and result['costs_validated'] is False
+    assert 'Financing/holding-cost review' in result['pending_checks']
+    assert 'PRIVATE_RESPONSE' not in json.dumps(result)
+
+
+def test_financing_evidence_does_not_remove_existing_blockers():
+    now=time.time();summary,instruments,pricing=payloads(now)
+    instruments['instruments'][0]['financing']=financing_payload()
+    result=om.normalize('EUR/USD',summary,instruments,pricing,now,'practice')
+    assert result['financing']['status']=='reported'
+    assert result['observed_at']==now and result['costs_validated'] is False
+    assert 'Financing/holding-cost review' in result['pending_checks']
+    assert 'Economic-event coverage' in result['pending_checks']
