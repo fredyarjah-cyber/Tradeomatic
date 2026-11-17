@@ -1,0 +1,29 @@
+name: Verify Tradeomatic
+on:
+  pull_request:
+  push:
+    branches: [main, feature/oanda-commission-evidence]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install -r requirements.txt
+      - run: python -m pytest -q
+      - run: npm ci
+      - run: python -m scripts.build_demo
+      - run: npm run build
+      - run: npm run test:ui
+      - run: npm run test:push
+      - run: npm run test:financing

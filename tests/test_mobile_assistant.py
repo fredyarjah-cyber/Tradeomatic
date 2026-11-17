@@ -186,3 +186,26 @@ def test_oanda_market_data_requires_mfa_and_csrf(monkeypatch):
         assert result.status_code==200 and result.json()['costs_validated'] is False
         refresh.assert_awaited_once_with('EUR/USD')
         assert not db.listing('broker_orders') and not db.listing('paper')
+
+def test_commission_review_http_requires_mfa_csrf_and_strict_scope(monkeypatch):
+    monkeypatch.setenv('OANDA_ACCOUNT_ID','123-456-789')
+    monkeypatch.setenv('OANDA_TOKEN','private-test-token')
+    monkeypatch.setenv('OANDA_MARKET_ENV','practice')
+    monkeypatch.setenv('PUBLIC_ORIGIN','https://testserver')
+    body={'symbol':'EUR/USD','confirmed':True,'review_days':7}
+    secret=owner()
+    path='/api/v3/market-data/oanda/commission-review'
+    with TestClient(app,base_url='https://testserver') as c:
+        assert c.post(path,json=body).status_code==401
+        r=c.post('/api/v3/login',json={'username':'test-owner','password':'a-local-test-password','otp':pyotp.TOTP(secret).now()})
+        assert r.status_code==200
+        assert c.post(path,json=body).status_code==403
+        headers={'Origin':'https://testserver','X-CSRF-Token':r.json()['csrf']}
+        assert c.post(path,json={**body,'validated':True},headers=headers).status_code==422
+        assert c.post(path,json=body,headers=headers).json()['status']=='active'
+        state=c.get('/api/v3/market-data/oanda').json()
+        assert state['commission_review']['status']=='active'
+        assert '123-456-789' not in str(state)
+        assert c.post(path+'/revoke',json={'symbol':'EUR/USD'}).status_code==403
+        assert c.post(path+'/revoke',json={'symbol':'EUR/USD'},headers=headers).json()['status']=='revoked'
+        assert not db.listing('paper') and not db.listing('broker_orders') and not db.listing('context')
