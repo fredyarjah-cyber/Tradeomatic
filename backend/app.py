@@ -60,7 +60,10 @@ def authorize(request:Request,authorization: str=Header(default='')):
 def health(): return {'status':'ok','execution':'disabled','worker':db.get('health','worker'), 'mode':os.getenv('DATA_MODE','demo')}
 
 @app.get('/api/snapshot',dependencies=[Depends(authorize)])
-def snapshot(): return {'quotes':current_quotes(),'signals':db.listing('signals'),'journal':db.listing('journal'),'scanner':db.get('config','scanner',{'enabled':False,'symbols':SYMBOLS,'intervals':['1h']}),'worker':db.get('health','worker'),'mode':os.getenv('DATA_MODE','demo'),'engine_settings':service.settings(),'paper':db.listing('paper'),'backtests':db.listing('backtests')}
+def snapshot():
+    from .provider_budget import status
+    budget=status(datetime.now(timezone.utc).timestamp())
+    return {'provider_budget':budget,'quotes':current_quotes(),'signals':db.listing('signals'),'journal':db.listing('journal'),'scanner':db.get('config','scanner',{'enabled':False,'symbols':SYMBOLS,'intervals':['1h']}),'worker':db.get('health','worker'),'mode':os.getenv('DATA_MODE','demo'),'engine_settings':service.settings(),'paper':db.listing('paper'),'backtests':db.listing('backtests')}
 
 class ScanConfig(BaseModel):
     enabled: bool

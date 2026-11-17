@@ -57,9 +57,11 @@ async def scan_once():
                 row['signal_status']=immutable.get('status')
                 db.put('quotes',key,row)
                 notifications.observe_signal(row,now)
-        except Exception:
+        except Exception as exc:
+            from .provider_budget import ProviderLimit
+            reason=str(exc) if isinstance(exc,ProviderLimit) else 'Data unavailable; recommendation suppressed'
             signal=recommend(symbol,interval,[],[],service.settings(),{'market_status':'unknown','data_mode':mode},now=now)
-            signal.update(reason='Data unavailable; recommendation suppressed',reasons=['Data unavailable; recommendation suppressed'])
+            signal.update(reason=reason,reasons=[reason])
             db.put_once('signals',signal['id'],signal)
             db.put('quotes',key,{**signal,'status':'error'})
             db.audit('scanner_error',key)  # Never log URLs/secrets from provider exceptions.
