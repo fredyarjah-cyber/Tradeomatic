@@ -133,8 +133,10 @@ def test_review_expires_and_rejects_future_snapshot(now,fresh):
 
 def test_review_checks_all_rows_before_display_truncation():
     rows=[{**ROW,'impact':'Low'}]*100+[ROW]
-    result=fmp.normalize(rows,1794922200,'2026-11-16','2026-11-18')
+    now=fmp.datetime.fromisoformat(ROW['date']).replace(tzinfo=fmp.timezone.utc).timestamp()
+    result=fmp.normalize(rows,now,'2026-11-16','2026-11-18')
     assert result['preview_truncated']
+    assert len(result['review']['potential_blocks'])==1
     assert any('truncated' in issue for issue in result['review']['issues'])
     assert result['review']['paper_approval_ready'] is False
 
