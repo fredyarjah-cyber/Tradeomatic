@@ -209,3 +209,25 @@ def test_commission_review_http_requires_mfa_csrf_and_strict_scope(monkeypatch):
         assert c.post(path+'/revoke',json={'symbol':'EUR/USD'}).status_code==403
         assert c.post(path+'/revoke',json={'symbol':'EUR/USD'},headers=headers).json()['status']=='revoked'
         assert not db.listing('paper') and not db.listing('broker_orders') and not db.listing('context')
+
+def test_fmp_preview_requires_mfa_csrf_and_disables_caching(monkeypatch):
+    from backend import fmp_calendar
+    secret=owner();monkeypatch.setenv('PUBLIC_ORIGIN','https://testserver')
+    preview=AsyncMock(return_value={'coverage':'unknown','preview_items':[]})
+    monkeypatch.setattr(fmp_calendar,'preview',preview)
+    with TestClient(app,base_url='https://testserver') as c:
+        assert c.get('/api/v3/calendar/fmp').status_code==401
+        assert c.post('/api/v3/calendar/fmp/preview',json={'symbol':'EUR/USD'}).status_code==401
+        r=c.post('/api/v3/login',json={'username':'test-owner','password':'a-local-test-password','otp':pyotp.TOTP(secret).now()})
+        assert r.status_code==200
+        status=c.get('/api/v3/calendar/fmp')
+        assert status.status_code==200 and status.headers['cache-control']=='no-store'
+        assert c.post('/api/v3/calendar/fmp/preview',json={'symbol':'EUR/USD'}).status_code==403
+        preview.assert_not_awaited()
+        h={'Origin':'https://testserver','X-CSRF-Token':r.json()['csrf']}
+        assert c.post('/api/v3/calendar/fmp/preview',json={'symbol':'EUR/USD','coverage':'complete'},headers=h).status_code==422
+        result=c.post('/api/v3/calendar/fmp/preview',json={'symbol':'EUR/USD'},headers=h)
+        assert result.status_code==200 and result.headers['cache-control']=='no-store'
+        assert result.json()['coverage']=='unknown'
+        preview.assert_awaited_once_with('EUR/USD')
+        assert not db.listing('context') and not db.listing('broker_orders')
