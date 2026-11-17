@@ -10,6 +10,22 @@ from .approvals import portfolio as reserved_portfolio
 from .scanner_lock import ScannerLock, OwnershipLost
 log=logging.getLogger('scanner')
 
+TRANSIENT_REASONS={
+    'Data unavailable; recommendation suppressed',
+    'Daily market-data budget reached; requests paused until next UTC day',
+    'Market-data rate limit reached; request deferred',
+    'Invalid provider credit limits; requests blocked',
+}
+
+def save_confirmed_result(signal):
+    existing=db.get('signals',signal['id'])
+    if existing and not existing.get('features') and existing.get('reason') in TRANSIENT_REASONS:
+        # Preserve the legacy outage record and its ID, while allowing recovery.
+        signal={**signal,'id':'recovered:'+signal['id']}
+    db.put_once('signals',signal['id'],signal)
+    return db.get('signals',signal['id'],signal)
+
+
 def worker_health():
     return {'heartbeat':datetime.now(timezone.utc).isoformat(),
             'status':'active','commit':os.getenv('RENDER_GIT_COMMIT','unknown'),
@@ -61,8 +77,8 @@ async def scan_once(ensure_owner=None):
                 # Monitor once more with point-in-time trend features; duplicate candles never refill.
                 service.monitor(symbol,interval,bars,now,signal.get('features'))
             if discovering:
-                db.put_once('signals',signal['id'],signal)
-                immutable=db.get('signals',signal['id'],signal)
+                immutable=save_confirmed_result(signal)
+                row['last_checked_at']=iso(now)
                 row.update({k:v for k,v in immutable.items() if k not in ('rank','status')})
                 row['signal_status']=immutable.get('status')
                 db.put('quotes',key,row)
@@ -73,7 +89,7 @@ async def scan_once(ensure_owner=None):
             from .provider_budget import ProviderLimit
             reason=str(exc) if isinstance(exc,ProviderLimit) else 'Data unavailable; recommendation suppressed'
             signal=recommend(symbol,interval,[],[],service.settings(),{'market_status':'unknown','data_mode':mode},now=now)
-            signal.update(reason=reason,reasons=[reason])
+            signal.update(id='data-error:'+signal['id'],reason=reason,reasons=[reason],data_error=True)
             db.put_once('signals',signal['id'],signal)
             db.put('quotes',key,{**signal,'status':'error'})
             db.audit('scanner_error',key)  # Never log URLs/secrets from provider exceptions.
