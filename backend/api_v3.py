@@ -35,6 +35,16 @@ def register(app):
     @router.post('/logout')
     def logout(request:Request,response:Response):
         token=request.cookies.get('tradeomatic_session','');s=db.get('sessions',security.digest(token),{});s['expires_at']=0;db.put('sessions',security.digest(token),s);response.delete_cookie('tradeomatic_session',path='/');return {'signed_out':True}
+    @router.get('/market-data/oanda')
+    def oanda_status():
+        from . import oanda_market
+        return {**oanda_market.readiness(),'observations':db.listing('market_observations')}
+    @router.post('/market-data/oanda/refresh')
+    async def oanda_refresh(body:dict):
+        from . import oanda_market
+        if set(body)!={'symbol'} or not isinstance(body.get('symbol'),str):raise HTTPException(422,'Choose one Forex symbol')
+        try:return await oanda_market.refresh(body['symbol'])
+        except oanda_market.MarketDataError as e:raise HTTPException(422,str(e))
     @router.get('/state')
     def state():
         return {'controls':controls.get(),'preferences':notifications.preferences(),'events':sorted(db.listing('notifications'),key=lambda x:x['created_at'],reverse=True)[:200],'devices':[{k:d[k] for k in ('id','label','enabled')} for d in db.listing('push_devices')],'deliveries':[{k:v for k,v in x.items() if k not in ('claim',)} for x in db.listing('push_delivery')],'brokers':brokers.status(),'broker_state':{n:db.get('broker_state',n) for n in ('OANDA_PRACTICE','ALPACA_PAPER')},'orders':db.listing('broker_orders'),'intents':db.listing('intents'),'health':{n:db.get('health',n) for n in ('worker','notifications','assistant')},**security.readiness()}
