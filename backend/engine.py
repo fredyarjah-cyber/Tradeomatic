@@ -3,7 +3,7 @@ import math
 from datetime import datetime, timezone
 
 FOREX = ['EUR/USD','GBP/USD','AUD/USD','NZD/USD','USD/JPY','USD/CHF','USD/CAD','EUR/GBP','EUR/JPY','EUR/CHF','EUR/CAD','EUR/AUD','EUR/NZD','GBP/JPY','GBP/CHF','GBP/CAD','GBP/AUD','GBP/NZD','AUD/JPY','AUD/CHF','AUD/CAD','AUD/NZD','CAD/JPY','CAD/CHF','CHF/JPY','NZD/JPY','NZD/CHF','NZD/CAD']
-SYMBOLS = FOREX + ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','SPY','QQQ','DIA','IWM']
+SYMBOLS = FOREX + ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','SPY','QQQ','DIA','IWM','TSLA','AMD','NFLX','AVGO','ORCL','CRM','JPM','BAC','V','MA','WMT','COST','XOM','CVX']
 INTERVALS = {'5min':300,'15min':900,'30min':1800,'1h':3600,'4h':14400,'1day':86400}
 
 def ema(values, length):
