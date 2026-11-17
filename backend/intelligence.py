@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_FLOOR
 from pydantic import BaseModel, Field, ConfigDict
 from .engine import analyze, ema, INTERVALS
 
-VERSION='confluence-v2.0'
+VERSION='confluence-v2.1'
 HIGHER={'5min':'15min','15min':'1h','30min':'4h','1h':'4h','4h':'1day','1day':None}
 
 def iso(t): return datetime.fromtimestamp(t,timezone.utc).isoformat()
@@ -35,6 +35,7 @@ class ExecutionAssumptions(BaseModel):
     spread_bps:float=Field(1.5,ge=0,le=500)
     slippage_bps:float=Field(1,ge=0,le=500)
     commission_per_unit:float=Field(.005,ge=0,le=100)
+    minimum_commission_per_fill:float=Field(0,ge=0,le=100000)
     min_units:float=Field(1,gt=0)
     unit_step:float=Field(1,gt=0)
     lot_units:float=Field(1,gt=0)
@@ -65,6 +66,19 @@ def conversion(symbol,price,context,asof):
     if not value or not math.isfinite(value) or value<=0 or item.get('asof',float('inf'))>asof or item.get('valid_until',0)<asof: return None
     return value
 
+def commission_fee(costs,units):
+    """USD commission for one modeled fill; legacy records default to no floor."""
+    if units<=0:return 0.0
+    return max(units*costs['commission_per_unit'],costs.get('minimum_commission_per_fill',0))
+
+def commission_reserve(costs,units):
+    """Conservative entry plus up to two exits, including uneven partial exits.
+
+    Sum of exit commissions is bounded by rate * units + two minimums.
+    """
+    if units<=0:return 0.0
+    return commission_fee(costs,units)+units*costs['commission_per_unit']+2*costs.get('minimum_commission_per_fill',0)
+
 def size_position(symbol,entry,stop,settings,costs,quote_to_usd,portfolio=None):
     s=RiskSettings(**settings); c=ExecutionAssumptions(**costs); p=portfolio or {}
     if not all(math.isfinite(v) and v>0 for v in (entry,stop,quote_to_usd)) or entry==stop: raise ValueError('Invalid prices or currency conversion')
@@ -74,15 +88,20 @@ def size_position(symbol,entry,stop,settings,costs,quote_to_usd,portfolio=None):
     if p.get('open_count',0)>=s.max_open_positions: reasons.append('Maximum open/pending positions reached')
     if p.get('daily_loss',0)>=s.equity*s.daily_loss_pct/100: reasons.append('Daily loss limit reached (realized losses + unrealized losses)')
     px_cost=entry*(c.spread_bps/2+c.slippage_bps)/10000
-    round_cost=2*px_cost*quote_to_usd+2*c.commission_per_unit
-    risk_per_unit=abs(entry-stop)*quote_to_usd+round_cost
     risk_budget=s.equity*s.risk_pct/100
     # Allocation is margin capital; leverage multiplies its notional cap.
     exposure_left=max(0,s.equity*s.max_exposure_pct/100-p.get('exposure',0))
     portfolio_left=max(0,s.equity*s.max_portfolio_risk_pct/100-p.get('open_risk',0))
     margin_left=max(0,s.equity-p.get('margin',0))
-    raw=min(risk_budget/risk_per_unit,portfolio_left/risk_per_unit,exposure_left/(entry*quote_to_usd),min(s.allocation,margin_left)*s.leverage/(entry*quote_to_usd))
+    budget=min(risk_budget,portfolio_left)
+    floor=c.minimum_commission_per_fill
+    # Both branches of max(rate * units, minimum) must fit the budget.
+    base_risk=abs(entry-stop)*quote_to_usd+2*px_cost*quote_to_usd
+    risk_cap=min((budget-2*floor)/(base_risk+2*c.commission_per_unit),(budget-3*floor)/(base_risk+c.commission_per_unit))
+    raw=max(0,min(risk_cap,exposure_left/(entry*quote_to_usd),min(s.allocation,margin_left)*s.leverage/(entry*quote_to_usd)))
     units=float((Decimal(str(raw))/Decimal(str(c.unit_step))).to_integral_value(rounding=ROUND_FLOOR)*Decimal(str(c.unit_step)))
+    round_cost=2*px_cost*quote_to_usd+commission_reserve(c.model_dump(),units)/units if units>0 else 0
+    risk_per_unit=abs(entry-stop)*quote_to_usd+round_cost
     if units<c.min_units: reasons.append('Position below broker minimum after risk, margin and exposure limits')
     return {'accepted':not reasons,'units':max(0,units) if not reasons else 0,'lots':max(0,units)/c.lot_units if '/' in symbol and not reasons else None,'shares':max(0,units) if '/' not in symbol and not reasons else None,'risk_usd':units*risk_per_unit if not reasons else 0,'risk_budget':risk_budget,'notional_usd':units*entry*quote_to_usd if not reasons else 0,'margin_usd':units*entry*quote_to_usd/s.leverage if not reasons else 0,'round_trip_cost_per_unit_usd':round_cost,'rejections':reasons}
 
@@ -166,13 +185,13 @@ def recommend(symbol,interval,bars,higher_bars,settings=None,context=None,portfo
         q=conversion(symbol,price,ctx,frontier)
         if q is None:reject.append('Fresh quote-to-USD conversion required')
         if q and sign and stop>0:
-            cost_px=2*price*(c.spread_bps/2+c.slippage_bps)/10000+2*c.commission_per_unit/q
+            sizing=size_position(symbol,price,stop,s.model_dump(),costs,q,portfolio)
+            cost_px=sizing['round_trip_cost_per_unit_usd']/q
             net_risk=abs(price-stop)+cost_px
             # Net RR includes modeled round-trip friction, not gross distance alone.
             t1=price+sign*(s.rr*net_risk+cost_px);t2=price+sign*(s.rr*1.5*net_risk+cost_px)
             if min(t1,t2)<=0:reject.append('Profit target would be nonpositive')
             if cost_px/max(abs(price-stop),1e-12)>s.max_cost_risk_ratio:reject.append('Transaction costs too large relative to stop distance')
-            sizing=size_position(symbol,price,stop,s.model_dump(),costs,q,portfolio)
             reject+=sizing['rejections'];out.update(quote_to_usd=q,sizing=sizing)
             if not reject:out.update(decision=direction,recommendation='YES',entry=price,entry_zone=[price-atr*.1,price+atr*.1],stop=stop,target=t1,target1=t1,target2=t2,status='PROVISIONAL' if provisional else 'WAITING_FOR_USER_APPROVAL')
     if provisional:notes.append('Intrabar preview may change before close; not eligible for paper entry')
