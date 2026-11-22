@@ -68,9 +68,18 @@ def expire_signals(now):
             enqueue('EXPIRED',state['signal_id'],{**state['details'],'recommendation':'NO','reason':'Recommendation expired. A new quote and approval are required.'})
 
 def payload(event,p):
+    if not p['details_on_lock_screen']:
+        return {
+            'id': event['id'],
+            'title': 'Tradeomatic AI',
+            'body': 'A trading research update is ready. Sign in to view the details.',
+            'tag': event['id'],
+            'data': {'event_id': event['id']},
+            'actions': [{'action': 'view', 'title': 'VIEW ANALYSIS'}],
+        }
     d=event['details'];title=f"Tradeomatic · {event['kind'].replace('_',' ')} · {d.get('instrument','Service')}"
     value=lambda k:'—' if d.get(k) is None else str(round(d[k],5)) if isinstance(d[k],(float,int)) else str(d[k])
-    body=(f"{value('market')} · {value('recommendation')} {value('direction')}\nPrice {value('price')} @ {value('price_time')}\nEntry {value('entry')} · SL {value('stop')}\nTP1 {value('target1')} · TP2 {value('target2')}\nSize {value('units')} units · Risk ${value('risk_usd')} · RR {value('rr')}:1\n{d.get('reason','')[:180]} · U/P&L ${value('unrealized_pnl')} · {d.get('mode','')}" if p['details_on_lock_screen'] else 'A trading research update is ready. Sign in to view the details.')
+    body=f"{value('market')} · {value('recommendation')} {value('direction')}\nPrice {value('price')} @ {value('price_time')}\nEntry {value('entry')} · SL {value('stop')}\nTP1 {value('target1')} · TP2 {value('target2')}\nSize {value('units')} units · Risk ${value('risk_usd')} · RR {value('rr')}:1\n{d.get('reason','')[:180]} · U/P&L ${value('unrealized_pnl')} · {d.get('mode','')}"
     return {'id':event['id'],'title':title,'body':body,'tag':event['id'],'data':{'event_id':event['id'],'signal_id':d.get('signal_id'),'details':d},'actions':[{'action':'approve','title':'YES — APPROVE TRADE'},{'action':'reject','title':'NO — REJECT TRADE'},{'action':'view','title':'VIEW ANALYSIS'},{'action':'snooze','title':'SNOOZE SIGNAL'}]}
 
 def deliver_once(now=None,sender=None):

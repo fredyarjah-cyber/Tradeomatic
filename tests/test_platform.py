@@ -22,6 +22,7 @@ def test_risk_budget_and_allocation_caps():
     assert r['units']==10 and r['notional_usd']==1000
     r=position_size(10000,10000,1,150,149,1/150)
     assert r['risk_usd']<=100
+    assert position_size(10000,10000,10,100,98)['risk_usd']==100
 
 @pytest.mark.parametrize('values',[(0,1,1,1,2),(100,101,1,1,2),(100,10,1,1,1),(float('nan'),10,1,1,2)])
 def test_bad_risk(values):

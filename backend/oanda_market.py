@@ -115,13 +115,14 @@ async def observe(symbol, transport=None):
     base=HOSTS[state['environment']]
     try:
         async with httpx.AsyncClient(timeout=15,follow_redirects=False,transport=transport) as client:
-            async def get(path,params=None):
+            async def get(stage,path,params=None):
                 response=await client.get(base+path,params=params,headers={'Authorization':'Bearer '+token,'Accept-Datetime-Format':'RFC3339'})
-                if response.status_code!=200:raise MarketDataError('OANDA rejected a market-data request; verify account environment and access')
+                if response.status_code != 200:
+                    raise MarketDataError(f'OANDA {stage} request failed (HTTP {response.status_code})')
                 return response.json()
-            summary=await get('/v3/accounts/'+account+'/summary')
-            instruments=await get('/v3/accounts/'+account+'/instruments',{'instruments':symbol.replace('/','_')})
-            pricing=await get('/v3/accounts/'+account+'/pricing',{'instruments':symbol.replace('/','_'),'includeHomeConversions':'true'})
+            summary=await get('account summary','/v3/accounts/'+account+'/summary')
+            instruments=await get('instrument details','/v3/accounts/'+account+'/instruments',{'instruments':symbol.replace('/','_')})
+            pricing=await get('pricing','/v3/accounts/'+account+'/pricing',{'instruments':symbol.replace('/','_'),'includeHomeConversions':'true'})
         return normalize(symbol,summary,instruments,pricing,time.time(),state['environment'])
     except MarketDataError:
         raise

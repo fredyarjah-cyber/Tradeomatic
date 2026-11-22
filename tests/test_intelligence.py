@@ -48,6 +48,16 @@ def test_missing_events_blackout_costs_and_stale_data_block():
     r=recommend(s['symbol'],'1h',b,h,context=ctx,now=NOW);assert r['recommendation']=='NO' and 'CPI' in r['reason']
     assert recommend(s['symbol'],'1h',b,h,context=ctx,now=NOW+10000)['recommendation']=='NO'
 
+def test_legacy_risk_setting_is_capped_without_changing_the_stored_record(monkeypatch):
+    settings = {**DEFAULT_SETTINGS, 'risk_pct': 10, 'allocation': 10000}
+    monkeypatch.setattr(db, 'get', lambda kind, key, default: settings)
+    result = size_position('AAPL', 100, 98, settings, assumptions('AAPL'), 1)
+    assert result['accepted']
+    assert result['risk_usd'] <= result['risk_budget'] == 100
+    assert service.settings()['risk_pct'] == 1
+    assert settings['risk_pct'] == 10
+
+
 def test_intrabar_cannot_be_approved():
     s,b,h=yes_signal();r=recommend(s['symbol'],'1h',b,h,context=service.context(s['symbol'],'SIMULATED',NOW),now=NOW,alert_mode='intrabar')
     assert r['provisional']
