@@ -60,11 +60,20 @@ def test_environment_must_be_explicit(configured,monkeypatch,environment):
         asyncio.run(om.observe('EUR/USD'))
 
 
-def test_authorization_errors_redacted(configured):
-    def respond(request):return httpx.Response(401,json={'message':'private-token-value'})
+@pytest.mark.parametrize(('endpoint', 'stage', 'status'), [
+    ('summary', 'account summary', 401),
+    ('instruments', 'instrument details', 403),
+    ('pricing', 'pricing', 503),
+])
+def test_provider_errors_report_stage_and_status_without_secrets(configured, endpoint, stage, status):
+    def respond(request):
+        if request.url.path.endswith('/' + endpoint):
+            return httpx.Response(status, json={'message': 'private-token-value 123-456-789'})
+        return httpx.Response(200, json={})
+
     with pytest.raises(om.MarketDataError) as error:
-        asyncio.run(om.observe('EUR/USD',httpx.MockTransport(respond)))
-    assert 'private-token-value' not in str(error.value)
+        asyncio.run(om.observe('EUR/USD', httpx.MockTransport(respond)))
+    assert str(error.value) == f'OANDA {stage} request failed (HTTP {status})'
 
 
 @pytest.mark.parametrize('change', ['stale','future','crossed','nonfinite','no_liquidity','missing_commission','minimum_commission','wrong_currency'])
