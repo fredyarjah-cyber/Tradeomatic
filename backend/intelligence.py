@@ -2,8 +2,8 @@
 import math, hashlib, json
 from datetime import datetime, timezone
 from decimal import Decimal, ROUND_FLOOR
-from pydantic import BaseModel, Field, ConfigDict
-from .engine import analyze, ema, INTERVALS
+from pydantic import BaseModel, Field, ConfigDict, field_validator
+from .engine import analyze, ema, INTERVALS, MAX_TRADE_RISK_PCT
 
 VERSION='confluence-v2.2'
 HIGHER={'5min':'15min','15min':'1h','30min':'4h','1h':'4h','4h':'1day','1day':None}
@@ -29,6 +29,12 @@ class RiskSettings(BaseModel):
     max_atr_pct:float=Field(5,gt=0,le=30)
     require_event_coverage:bool=True
     allow_short:bool=True
+
+    @field_validator('risk_pct')
+    @classmethod
+    def cap_per_trade_risk(cls, value):
+        return min(value, MAX_TRADE_RISK_PCT)
+
 
 class ExecutionAssumptions(BaseModel):
     model_config=ConfigDict(extra='forbid',allow_inf_nan=False)

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 FOREX = ['EUR/USD','GBP/USD','AUD/USD','NZD/USD','USD/JPY','USD/CHF','USD/CAD','EUR/GBP','EUR/JPY','EUR/CHF','EUR/CAD','EUR/AUD','EUR/NZD','GBP/JPY','GBP/CHF','GBP/CAD','GBP/AUD','GBP/NZD','AUD/JPY','AUD/CHF','AUD/CAD','AUD/NZD','CAD/JPY','CAD/CHF','CHF/JPY','NZD/JPY','NZD/CHF','NZD/CAD']
 SYMBOLS = FOREX + ['AAPL','MSFT','NVDA','AMZN','GOOGL','META','SPY','QQQ','DIA','IWM','TSLA','AMD','NFLX','AVGO','ORCL','CRM','JPM','BAC','V','MA','WMT','COST','XOM','CVX']
+MAX_TRADE_RISK_PCT = 1
 INTERVALS = {'5min':300,'15min':900,'30min':1800,'1h':3600,'4h':14400,'1day':86400}
 
 def ema(values, length):
@@ -31,7 +32,7 @@ def analyze(bars, rr=2):
 def position_size(equity, allocation, risk_pct, entry, stop, quote_to_usd=1, rr=2):
     vals=[equity,allocation,risk_pct,entry,stop,quote_to_usd,rr]
     if not all(math.isfinite(v) and v>0 for v in vals) or risk_pct>100 or allocation>equity or entry==stop: raise ValueError('Positive finite values, distinct stop, allocation <= equity and risk <= 100 required')
-    budget=equity*risk_pct/100
+    budget=equity*min(risk_pct,MAX_TRADE_RISK_PCT)/100
     risk_units=budget/(abs(entry-stop)*quote_to_usd)
     allocation_units=allocation/(entry*quote_to_usd)
     units=min(risk_units,allocation_units)

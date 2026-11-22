@@ -4,7 +4,8 @@ from . import db
 from .intelligence import DEFAULT_SETTINGS, RiskSettings, assumptions, recommend, conversion
 from .paper import approve, advance, portfolio_summary, request_exit, performance, ACTIVE
 
-def settings():return {**DEFAULT_SETTINGS,**db.get('config','risk_v2',{})}
+def settings():
+    return RiskSettings(**{**DEFAULT_SETTINGS, **db.get('config', 'risk_v2', {})}).model_dump()
 
 def context(symbol,mode,now):
     if mode=='SIMULATED':return {'data_mode':mode,'market_status':'open','costs':{**assumptions(symbol,True,0),'valid_until':now+86400},'cost_source':'SIMULATED ASSUMPTIONS','events':{'coverage':'complete','asof':0,'valid_until':now+86400,'items':[]},'conversion':{'quote_to_usd':1 if symbol.endswith('/USD') else .0065 if symbol.endswith('/JPY') else 1.1,'asof':0,'valid_until':now+86400}}

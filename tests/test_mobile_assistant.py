@@ -105,6 +105,19 @@ def test_notification_dedup_retry_and_expiry(monkeypatch):
     assert len(calls)==2 and db.listing('push_delivery')[0]['status']=='SENT'
     assert 'APPROVE' in calls[-1]['actions'][0]['title'] and 'token' not in str(calls[-1]).lower()
 
+@pytest.mark.parametrize('kind', ['OPPORTUNITY', 'ENTRY_ZONE', 'EXIT'])
+def test_private_push_contains_only_generic_review(kind):
+    event = {
+        'id': 'a' * 64,
+        'kind': kind,
+        'details': {'instrument': 'EUR/USD', 'signal_id': 'private-signal', 'entry': 1.12},
+    }
+    private = notifications.payload(event, {'details_on_lock_screen': False})
+    assert private['title'] == 'Tradeomatic AI'
+    assert private['data'] == {'event_id': event['id']}
+    assert private['actions'] == [{'action': 'view', 'title': 'VIEW ANALYSIS'}]
+    assert 'EUR/USD' not in str(private)
+
 def test_health_incident_and_recovery_dedup():
     assistant.health_once(1000);assistant.health_once(1001)
     count=len(db.listing('notifications'));assert count==2
