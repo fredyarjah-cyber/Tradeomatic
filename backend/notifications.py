@@ -111,7 +111,13 @@ def deliver_once(now=None,sender=None):
                 sender(decrypt(device['subscription']),payload(event,p));status='SENT';error=None
             except Exception as e:
                 code=getattr(getattr(e,'response',None),'status_code',None)
-                status='GONE' if code in (404,410) else 'FAILED' if job['attempts']>=5 else 'RETRY';error='Push endpoint expired' if status=='GONE' else 'Push delivery failed; transport detail redacted'
+                status = 'GONE' if code in (404, 410) else 'FAILED' if job['attempts'] >= 5 else 'RETRY'
+                if status == 'GONE':
+                    error = 'Push endpoint expired'
+                elif type(code) is int and 100 <= code <= 599:
+                    error = f'Push provider returned HTTP {code}'
+                else:
+                    error = 'Push delivery failed before a provider HTTP response was available'
             with db.atomic() as tx:
                 current=tx.get('push_delivery',key,{})
                 if current.get('claim')!=claim:continue
