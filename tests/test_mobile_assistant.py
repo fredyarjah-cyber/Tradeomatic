@@ -105,6 +105,24 @@ def test_notification_dedup_retry_and_expiry(monkeypatch):
     assert len(calls)==2 and db.listing('push_delivery')[0]['status']=='SENT'
     assert 'APPROVE' in calls[-1]['actions'][0]['title'] and 'token' not in str(calls[-1]).lower()
 
+def test_push_failure_reports_only_provider_status(monkeypatch):
+    monkeypatch.setenv('PUSH_ENABLED', 'true')
+    monkeypatch.setenv('VAPID_PRIVATE_KEY', 'test-only')
+    monkeypatch.setenv('VAPID_SUBJECT', 'mailto:test@example.com')
+    notifications.pref_save({'enabled': True})
+    notifications.subscribe(subscription(), 'test')
+    notifications.enqueue('TEST', 'provider-error', {})
+
+    def reject(subscription, payload):
+        response = httpx.Response(403, text='private provider detail')
+        raise httpx.HTTPStatusError('private transport detail', request=None, response=response)
+
+    notifications.deliver_once(sender=reject)
+    delivery, = db.listing('push_delivery')
+    assert delivery['status'] == 'RETRY'
+    assert delivery['last_error'] == 'Push provider returned HTTP 403'
+
+
 @pytest.mark.parametrize('kind', ['OPPORTUNITY', 'ENTRY_ZONE', 'EXIT'])
 def test_private_push_contains_only_generic_review(kind):
     event = {
